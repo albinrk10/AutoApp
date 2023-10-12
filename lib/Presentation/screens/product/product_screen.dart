@@ -10,15 +10,15 @@ import '../../widgets/input_deco.dart';
 import '../../widgets/widgets.dart';
 
 class ProductScreen extends StatelessWidget {
-  const ProductScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final productsService = Provider.of<ProductsService>(context);
+
+    final productService = Provider.of<ProductsService>(context);
 
     return ChangeNotifierProvider(
-      create: (_) => ProductFormProvider(productsService.selectedProdct),
-      child: _ProductScreenBody(productsService: productsService),
+      create: ( _ ) => ProductFormProvider( productService.selectedProduct ),
+      child: _ProductScreenBody(productService: productService),
     );
   }
 }
@@ -26,131 +26,138 @@ class ProductScreen extends StatelessWidget {
 class _ProductScreenBody extends StatelessWidget {
   const _ProductScreenBody({
     Key? key,
-    required this.productsService,
+    required this.productService,
   }) : super(key: key);
 
-  final ProductsService productsService;
+  final ProductsService productService;
 
   @override
   Widget build(BuildContext context) {
+    
     final productForm = Provider.of<ProductFormProvider>(context);
+
     return Scaffold(
       body: SingleChildScrollView(
-        //keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        // keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         child: Column(
           children: [
+
             Stack(
               children: [
-                ProductImage(url: productsService.selectedProdct.picture),
+                ProductImage( url: productService.selectedProduct.picture ),
                 Positioned(
                   top: 60,
                   left: 20,
                   child: IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: Icon(
-                      Icons.arrow_back_ios_new,
-                      size: 40,
-                      color: Colors.white,
-                    ),
-                  ),
+                    onPressed: () => Navigator.of(context).pop(), 
+                    icon: Icon( Icons.arrow_back_ios_new, size: 40, color: Colors.white ),
+                  )
                 ),
+
                 Positioned(
                   top: 60,
                   right: 20,
                   child: IconButton(
                     onPressed: () async {
-                      //TODO: camara o galeria
+                      
                       final picker = new ImagePicker();
-                      final XFile? pickedFile = await picker.pickImage(
-                          source: ImageSource.camera, imageQuality: 100);
-                      if (pickedFile == null) {
-                        print('No seleccion nada');
+                      final PickedFile? pickedFile = await picker.getImage(
+                        // source: ImageSource.gallery,
+                        source: ImageSource.camera,
+                        imageQuality: 100
+                      );
+
+                      if( pickedFile == null ) {
+                        print('No seleccionó nada');
                         return;
                       }
 
-                      productsService.updateSelectProductImage(pickedFile.path);
-                    },
-                    icon: Icon(
-                      Icons.camera_alt_outlined,
-                      size: 40,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
+                      productService.updateSelectedProductImage(pickedFile.path);
+                      
+
+                    }, 
+                    icon: Icon( Icons.camera_alt_outlined, size: 40, color: Colors.white ),
+                  )
+                )
               ],
             ),
+
             _ProductForm(),
-            SizedBox(height: 100),
+
+            SizedBox( height: 100 ),
+
           ],
         ),
       ),
+
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       floatingActionButton: FloatingActionButton(
-        child: productsService.isSaving
-            ? CircularProgressIndicator(
-                color: Colors.white,
-              )
-            : Icon(Icons.save_outlined),
-        onPressed: productsService.isSaving
-            ? null
-            : () async {
-                //TODO Guardar un producto
-                if (!productForm.isValidForm()) return;
+        child: productService.isSaving 
+          ? CircularProgressIndicator( color: Colors.white )
+          : Icon( Icons.save_outlined ),
+        onPressed: productService.isSaving 
+          ? null
+          : () async {
+          
+          if ( !productForm.isValidForm() ) return;
 
-                final String? imageUrl = await productsService.uploadImage();
+          final String? imageUrl = await productService.uploadImage();
 
-                if (imageUrl != null) productForm.product.picture = imageUrl;
+          if ( imageUrl != null ) productForm.product.picture = imageUrl;
 
-                await productsService.saveOrCreateProduct(productForm.product);
-              },
+          await productService.saveOrCreateProduct(productForm.product);
+
+        },
       ),
-    );
+   );
   }
 }
 
 class _ProductForm extends StatelessWidget {
-  const _ProductForm({
-    Key? key,
-  }) : super(key: key);
+
 
   @override
   Widget build(BuildContext context) {
+
     final productForm = Provider.of<ProductFormProvider>(context);
     final product = productForm.product;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10),
+      padding: EdgeInsets.symmetric(horizontal: 10 ),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: EdgeInsets.symmetric(horizontal: 20),
         width: double.infinity,
-        decoration: _builBoxDecoration(),
+        decoration: _buildBoxDecoration(),
         child: Form(
           key: productForm.formKey,
           autovalidateMode: AutovalidateMode.onUserInteraction,
           child: Column(
             children: [
-              SizedBox(
-                height: 10,
-              ),
+
+              SizedBox( height: 10 ),
+
               TextFormField(
                 initialValue: product.name,
-                onChanged: (value) => product.name = value,
-                validator: (value) {
-                  if (value == null || value.length < 1)
-                    return 'El nombre es obligatorio';
+                onChanged: ( value ) => product.name = value,
+                validator: ( value ) {
+                  if ( value == null || value.length < 1 )
+                    return 'El nombre es obligatorio'; 
                 },
                 decoration: InputDecorations.authInputDecoration(
-                    hintText: 'Nombre del producto', labelText: 'Nombre:'),
+                  hintText: 'Nombre del producto', 
+                  labelText: 'Nombre:'
+                ),
               ),
-              SizedBox(height: 30),
+
+              SizedBox( height: 30 ),
+
               TextFormField(
                 initialValue: '${product.price}',
                 inputFormatters: [
-                  FilteringTextInputFormatter.allow(
-                      RegExp(r'^(\d+)?\.?\d{0,2}'))
+                  FilteringTextInputFormatter.allow(RegExp(r'^(\d+)?\.?\d{0,2}'))
                 ],
-                onChanged: (value) {
-                  if (double.tryParse(value) == null) {
+                onChanged: ( value ) {
+                  if ( double.tryParse(value) == null ) {
                     product.price = 0;
                   } else {
                     product.price = double.parse(value);
@@ -158,19 +165,22 @@ class _ProductForm extends StatelessWidget {
                 },
                 keyboardType: TextInputType.number,
                 decoration: InputDecorations.authInputDecoration(
-                    hintText: '\$150', labelText: 'Precio:'),
+                  hintText: '\$150', 
+                  labelText: 'Precio:'
+                ),
               ),
-              SizedBox(
-                height: 30,
-              ),
+              
+              SizedBox( height: 30 ),
               SwitchListTile.adaptive(
-                  value: product.available,
-                  title: Text('Disponible'),
-                  activeColor: Colors.indigo,
-                  onChanged: productForm.updateAvailability),
-              SizedBox(
-                height: 30,
+                value: product.available, 
+                title: Text('Disponible'),
+                activeColor: Colors.indigo,
+                onChanged: productForm.updateAvailability
               ),
+
+
+              SizedBox( height: 30 )
+
             ],
           ),
         ),
@@ -178,15 +188,15 @@ class _ProductForm extends StatelessWidget {
     );
   }
 
-  BoxDecoration _builBoxDecoration() => BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-              bottomRight: Radius.circular(25),
-              bottomLeft: Radius.circular(25)),
-          boxShadow: [
-            BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                offset: Offset(0, 5),
-                blurRadius: 5)
-          ]);
+  BoxDecoration _buildBoxDecoration() => BoxDecoration(
+    color: Colors.white,
+    borderRadius: BorderRadius.only( bottomRight: Radius.circular(25), bottomLeft: Radius.circular(25)),
+    boxShadow: [
+      BoxShadow(
+        color: Colors.black.withOpacity(0.05),
+        offset: Offset(0,5),
+        blurRadius: 5
+      )
+    ]
+  );
 }
