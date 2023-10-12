@@ -20,11 +20,20 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final productsService = Provider.of<ProductsService>(context);
 
-    if(productsService.isLoading) return LoadingScreen();
+    if(productsService.isLoading) return const LoadingScreen();
 
     return  Scaffold(
       appBar: AppBar(
-        title: Text('Autos'),
+        title: const Text('Autos'),
+    //     actions: [
+    //   IconButton(
+    //     icon: Icon(Icons.help),
+    //     onPressed: () {
+    //       // Aquí puede agregar la lógica para mostrar la ayuda
+
+    //     },
+    //   ),
+    // ],
       ),
       body: ListView.builder(
         itemCount: productsService.products.length,
@@ -38,9 +47,9 @@ class HomeScreen extends StatelessWidget {
           )
         ),
         floatingActionButton: FloatingActionButton(
-          child:Icon(Icons.add),
+          child:const Icon(Icons.add),
           onPressed:(){
-            productsService.selectedProdct=new Product(
+            productsService.selectedProdct=Product(
               available: false,
                name: '',
                price: 0);  

@@ -8,9 +8,9 @@ class LoadingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return  Scaffold(
       appBar: AppBar(
-          title: Text('Products'),
+          title: const Text('Products'),
       ),
-      body: Center(
+      body: const Center(
          child: CircularProgressIndicator(
           color: Colors.indigo,
          ),
