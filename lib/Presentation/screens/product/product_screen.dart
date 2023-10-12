@@ -6,8 +6,8 @@ import 'package:productos_app/infraestructure/services/services.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../widgets/input_deco.dart';
-import '../widgets/widgets.dart';
+import '../../widgets/input_deco.dart';
+import '../../widgets/widgets.dart';
 
 class ProductScreen extends StatelessWidget {
   const ProductScreen({Key? key}) : super(key: key);
